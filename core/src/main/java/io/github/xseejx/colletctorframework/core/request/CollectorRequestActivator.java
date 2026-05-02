@@ -19,7 +19,6 @@ public class CollectorRequestActivator {
 
         registry.discoverAll();
 
-       //System.out.println("Available collectors: " + registry.listAvailable());
         
         CollectorRequest request = new CollectorRequest(collectorName, parameters);
         AtomicReference<String> jsonResponse = new AtomicReference<>("{}");
@@ -31,7 +30,7 @@ public class CollectorRequestActivator {
                 CollectorResult res = result.get();
                 jsonResponse.set(res.getResult().toJSONString());
             } catch (Exception e) {
-                e.printStackTrace();
+                jsonResponse.set("{\"error\": \"" + e.getMessage() + "\"}");
             }
             engine.shutdown();
         });

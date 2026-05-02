@@ -4,6 +4,7 @@ package io.github.xseejx.colletctorframework.collectors.hardware;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.auto.service.AutoService;
 import io.github.xseejx.colletctorframework.core.api.Collector;
 import io.github.xseejx.colletctorframework.core.api.CollectorMetadata;
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
@@ -11,6 +12,7 @@ import org.json.simple.JSONObject;
 
 import oshi.SystemInfo;
 
+@AutoService(Collector.class)
 @CollectorMetadata(
     name        = "hardware.cpu",
     description = "CPU usage, frequency, temperature",
@@ -70,7 +72,7 @@ public class CollectorCPU implements Collector
         );
     }
 
-    // all classes must be protected
+
 
 
 

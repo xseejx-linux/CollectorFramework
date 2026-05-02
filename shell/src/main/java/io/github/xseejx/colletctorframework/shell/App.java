@@ -15,14 +15,13 @@ public class App
     public static void main( String[] args )
     {
         CollectorRequestActivator activator = new CollectorRequestActivator();
-        // print result of collector execution
-        // wait for the result to be available and then print it
+
         System.out.println("Waiting for collector result...");
-        // Simulate waiting (in a real scenario, you might use a callback or future)
-        String s = activator.activateRequest("hardware.cpu", Map.of(
-            "includePerCore", true,
-            "includeTemperature", true
+
+        String s = activator.activateRequest("generic.test", Map.of(
+            "value1", false
         ));
+
         System.out.println("Collector execution completed.");
 
         System.out.println("Collector result: " + s);

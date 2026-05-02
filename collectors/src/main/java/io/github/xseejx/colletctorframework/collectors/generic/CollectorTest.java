@@ -4,15 +4,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.xseejx.colletctorframework.collectors.hardware.CollectorCPU;
+import com.google.auto.service.AutoService;
+
+
 import io.github.xseejx.colletctorframework.core.api.Collector;
 import io.github.xseejx.colletctorframework.core.api.CollectorMetadata;
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
-import oshi.SystemInfo;
+
 
 import org.json.simple.JSONObject;
 
-
+@AutoService(Collector.class)
 @CollectorMetadata(
     name        = "generic.test",
     description = "A simple test collector",
@@ -20,12 +22,12 @@ import org.json.simple.JSONObject;
 )
 
 public class CollectorTest implements Collector{
-    private static final Logger logger = LoggerFactory.getLogger(CollectorCPU.class);
+    private static final Logger logger = LoggerFactory.getLogger(CollectorTest.class);
 
 
     // With reflective modify those values on core
-    private boolean value1;
-    private String value2;
+    private boolean value1 = false;
+    private String value2 = "Test0";
 
     @Override
     public String getName() { return "generic.test"; }
@@ -33,20 +35,20 @@ public class CollectorTest implements Collector{
     @Override
     public CollectorResult collect() { 
         try {
-            SystemInfo si = new SystemInfo();
-            var cpu = si.getHardware().getProcessor();
+           
+            
 
 
             JSONObject result = new JSONObject();
-            result.put("model", "Test");
-            //System.out.println(result.toJSONString());
+            result.put("Value1", value1);
+            result.put("Value2", value2);
            
 
             return CollectorResult.ok(getName(), result);
 
 
         } catch (Exception e) {
-            logger.error("Error occurred while collecting CPU information", e);
+            logger.error("Error occurred while collecting Test information", e);
             JSONObject result = new JSONObject();
             return CollectorResult.failure(getName(), result);
         }
@@ -55,19 +57,19 @@ public class CollectorTest implements Collector{
     @Override
     public Map<String, Class<?>> getAcceptedParameters() {
         return Map.of(
-            "includePerCore",      Boolean.class,
-            "includeTemperature",  Boolean.class
+            "value1",      Boolean.class,
+            "value2",  String.class
         );
     }
 
-    // all classes must be protected
+
 
 
 
     public static void main( String[] args )
     {   
-        SystemInfo si = new SystemInfo();
+        
         JSONObject result = new JSONObject();
-        logger.info("CPU: " + si.getHardware().getProcessor().toString());
+        logger.info("Test Hello");
     }
 }
