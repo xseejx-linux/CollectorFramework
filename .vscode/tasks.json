@@ -1,0 +1,91 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Project",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-q", "clean", "install", "-DskipTests"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Application",
+      "type": "shell",
+      "command": "bash",
+      "args": ["${workspaceFolder}/run.sh"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Rebuild & Run",
+      "type": "shell",
+      "command": "bash",
+      "args": ["${workspaceFolder}/rebuild.sh"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-q", "test"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Clean Build",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-q", "clean"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Build + Run Dev Mode",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-f", "shell/pom.xml", "-am", "-q", "clean", "package", "-DskipTests"],
+      "isBackground": false,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Clear Maven Cache",
+      "type": "shell",
+      "command": "rm",
+      "args": ["-rf", "${env:HOME}/.m2/repository/io/github/xseejx/colletctorframework/"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}
