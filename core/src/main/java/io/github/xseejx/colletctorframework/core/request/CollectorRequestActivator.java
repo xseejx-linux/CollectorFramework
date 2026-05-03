@@ -35,22 +35,22 @@ public class CollectorRequestActivator {
         return jsonResponse.get(); 
     }
 
-    /*
-    public List<String> activateRequests(List<Map<String, Map<String, Object>>> requests) {
+    
+    public List<String> getMetada(String collectorName) {
         listAvailable();
         List<String> results = new ArrayList<>();
-        requests.forEach(request -> {
-            String collectorName = request.entrySet().iterator().next().getKey();
-            Map<String, Object> parameters = request.get(collectorName);
-            // System.out.println("Activating collector: " + collectorName + " with parameters: " + parameters);
-            String result = activateRequest(collectorName, parameters);
-            results.add(result);
+        registry.get(collectorName).ifPresent(collector -> {
+            // Let dynamicallt add metadata infos
+            results.add("Name: " + collector.getName());
+            results.add("Description: " + collector.getClass().getAnnotation(io.github.xseejx.colletctorframework.core.api.CollectorMetadata.class).description());
+            results.add("Tags: " + String.join(", ", collector.getClass().getAnnotation(io.github.xseejx.colletctorframework.core.api.CollectorMetadata.class).tags()));
+            //results.add("Description: " + collector.getClass().getAnnotation(io.github.xseejx.colletctorframework.core.api.CollectorMetadata.class).new_field());
         });
         return results;
     }
-    */
+    
 
-    public List<String> activateRequestsV2(List<Map<String, Map<String, Object>>> requests) {
+    public List<String> activateRequests(List<Map<String, Map<String, Object>>> requests) {
         listAvailable();
         List<CollectorRequest> collectorRequests = new ArrayList<>();
         AtomicReference<String> resultsJson = new AtomicReference<>("[]");

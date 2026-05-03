@@ -40,5 +40,15 @@ public class App
         //System.out.println("Collector execution completed.");
 
         //System.out.println("Collector result: " + s);
+
+
+
+        // LIST OUT ALL METADA INFOS ABOUT ALL COLLECTORS
+        /*CollectorRequestActivator activator = new CollectorRequestActivator();
+        List<String> metadataConnector = activator.getMetada("hardware.cpu");
+        System.out.println("Metadata for hardware.cpu:");
+        metadataConnector.forEach(System.out::println);
+        */
+
     }
 }
