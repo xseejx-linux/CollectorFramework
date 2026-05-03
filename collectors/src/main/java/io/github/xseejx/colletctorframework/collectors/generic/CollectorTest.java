@@ -57,7 +57,7 @@ public class CollectorTest implements Collector{
     @Override
     public Map<String, Class<?>> getAcceptedParameters() {
         return Map.of(
-            "value1",      Boolean.class,
+            "value1",  Boolean.class,
             "value2",  String.class
         );
     }

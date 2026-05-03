@@ -41,10 +41,10 @@ public class CollectorRegistry {
 
         for (Collector c : loader) {
             try {
-                System.out.println("Loaded: " + c.getClass());
+                //System.out.println("Loaded: " + c.getClass());
                 register(c);
             } catch (ServiceConfigurationError e) {
-                System.err.println("Failed to load collector provider: " + e.getMessage());
+                //System.err.println("Failed to load collector provider: " + e.getMessage());
             }
         }
     }
