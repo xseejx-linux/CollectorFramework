@@ -1,65 +1,82 @@
 package io.github.xseejx.colletctorframework.collectors.hardware;
 
-
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.auto.service.AutoService;
+
 import io.github.xseejx.colletctorframework.core.api.Collector;
 import io.github.xseejx.colletctorframework.core.api.CollectorMetadata;
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
+
 import org.json.simple.JSONObject;
 
 import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.Sensors;
+import oshi.software.os.OperatingSystem;
 
 @AutoService(Collector.class)
 @CollectorMetadata(
-    name        = "hardware.cpu",
-    description = "CPU usage, frequency, temperature",
-    tags        = {"hardware", "realtime"}
+    name = "hardware.cpu",
+    description = "Reliable CPU stats",
+    tags = {"hardware", "realtime"}
 )
+public class CollectorCPU implements Collector {
 
-
-/**
- * A collector for gathering CPU hardware information.
- */
-public class CollectorCPU implements Collector
-{
     private static final Logger logger = LoggerFactory.getLogger(CollectorCPU.class);
 
-
-    // With reflective modify those values on core
-    private boolean includePerCore;
-    private boolean includeTemperature;
+    private boolean includeAll;
 
     @Override
-    public String getName() { return "hardware.cpu"; }
+    public String getName() {
+        return "hardware.cpu";
+    }
 
     @Override
-    public CollectorResult collect() { 
+    @SuppressWarnings("unchecked")
+    public CollectorResult collect() {
         try {
             SystemInfo si = new SystemInfo();
-            var cpu = si.getHardware().getProcessor();
-
+            CentralProcessor cpu = si.getHardware().getProcessor();
+            Sensors sensors = si.getHardware().getSensors();
+            OperatingSystem os = si.getOperatingSystem();
 
             JSONObject result = new JSONObject();
-            if (includePerCore) {
-                result.put("includePerCore", "ON");
-            }else {
-                result.put("includePerCore", "OFF");
-            }
-            if (includeTemperature) {
-                result.put("includeTemperature", "ON");
-            }else {
-                result.put("includeTemperature", "OFF");
+
+            if (includeAll) {
+
+                long[] prevTicks = cpu.getSystemCpuLoadTicks();
+                Thread.sleep(1000);
+                double cpuLoad = cpu.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
+                result.put("cpuUsagePercent", String.format("%.2f", cpuLoad));
+
+                long maxFreq = cpu.getMaxFreq();
+                double freqGHz = (maxFreq / 1_000_000_000.0) * (cpuLoad / 100.0);
+                result.put("estimatedFrequencyGHz", String.format("%.2f", 3.5 + freqGHz));
+
+                result.put("baseFrequencyGHz", String.format("%.2f", maxFreq / 1_000_000_000.0));
+
+                result.put("physicalCores", cpu.getPhysicalProcessorCount());
+                result.put("logicalCores", cpu.getLogicalProcessorCount());
+
+                result.put("processCount", os.getProcessCount());
+                result.put("threadCount", os.getThreadCount());
+
+                result.put("uptimeSeconds", os.getSystemUptime());
+
+                result.put("cpuName", cpu.getProcessorIdentifier().getName());
+                result.put("architecture", System.getProperty("os.arch"));
             }
 
             return CollectorResult.ok(getName(), result);
 
-
         } catch (Exception e) {
-            logger.error("Error occurred while collecting CPU information", e);
+            logger.error("Error collecting CPU data", e);
             JSONObject result = new JSONObject();
+            result.put("error", e.getMessage());
             return CollectorResult.failure(getName(), result);
         }
     }
@@ -67,19 +84,17 @@ public class CollectorCPU implements Collector
     @Override
     public Map<String, Class<?>> getAcceptedParameters() {
         return Map.of(
-            "includePerCore",      Boolean.class,
-            "includeTemperature",  Boolean.class
+            "includeAll", Boolean.class
         );
     }
 
+    public static void main(String[] args) throws Exception {
+        CollectorCPU c = new CollectorCPU();
+        c.includeAll = true;
 
+        CollectorResult res = c.collect();
 
-
-
-    public static void main( String[] args )
-    {   
-        SystemInfo si = new SystemInfo();
-        JSONObject result = new JSONObject();
-        logger.info("CPU: " + si.getHardware().getProcessor().toString());
+        System.out.println("=== CPU CLEAN INFO ===");
+        System.out.println(res.getResult().toJSONString());
     }
 }
