@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -49,7 +50,30 @@ public class CollectorEngine {
     }
 
     /**
+     * Asynchronously execute a single named collector, with optional parameter injection.
+     * @param request
+     * @return CompletableFuture<CollectorResult>
+     */
+    public CompletableFuture<CollectorResult> executeAsync(CollectorRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            Collector collector = registry.get(request.getCollectorName())
+                .orElseThrow(() -> new CollectorNotFoundException(request.getCollectorName()));
+
+            if (!collector.isAvailable()) {
+                return CollectorResult.failure(request.getCollectorName(), new JSONObject());
+            }
+
+            injectParameters(collector, request.getParameters());
+
+            
+            return collector.collect();
+        });
+    }
+
+    /**
      * Execute multiple collectors in parallel, return all results.
+     * 
+     * @param requests
      */
     public Map<String, Future<CollectorResult>> executeAll(List<CollectorRequest> requests) {
         Map<String, Future<CollectorResult>> futures = new LinkedHashMap<>();
@@ -58,6 +82,24 @@ public class CollectorEngine {
         }
         return futures;
     }
+
+    /**
+     * 
+     * Execute streaming collector
+     * 
+     */
+    //TODO: implement streaming execution and result handling
+    public Future<CollectorResult> executeStream(CollectorRequest request) {
+        // For streaming collectors, we might want to handle them differently,
+        // e.g. by returning a special StreamCollectorResult that can be consumed incrementally.
+        // For now, we just execute it like a normal collector.
+        return execute(request);
+    }
+
+
+    //TODO: implement streaming execution for single and multiple collectors
+
+
 
     /**
      * Reflectively set fields on a collector before invocation.
