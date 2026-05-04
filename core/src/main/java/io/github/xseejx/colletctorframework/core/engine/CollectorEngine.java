@@ -83,21 +83,6 @@ public class CollectorEngine {
         return futures;
     }
 
-    /**
-     * 
-     * Execute streaming collector
-     * 
-     */
-    //TODO: implement streaming execution and result handling
-    public Future<CollectorResult> executeStream(CollectorRequest request) {
-        // For streaming collectors, we might want to handle them differently,
-        // e.g. by returning a special StreamCollectorResult that can be consumed incrementally.
-        // For now, we just execute it like a normal collector.
-        return execute(request);
-    }
-
-
-    //TODO: implement streaming execution for single and multiple collectors
 
 
 

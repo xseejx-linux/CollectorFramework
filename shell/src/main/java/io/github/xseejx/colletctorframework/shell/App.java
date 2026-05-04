@@ -2,9 +2,15 @@ package io.github.xseejx.colletctorframework.shell;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import io.github.xseejx.colletctorframework.core.engine.stream.StopCondition;
+import io.github.xseejx.colletctorframework.core.engine.stream.StreamSpec;
+import io.github.xseejx.colletctorframework.core.engine.stream.StreamTrigger;
 import io.github.xseejx.colletctorframework.core.request.CollectorRequestActivator;
+import io.github.xseejx.colletctorframework.core.request.StreamerRequestActivator;
 
 /**
  * Test Application for the Collector Framework. 
@@ -18,7 +24,7 @@ public class App
     public static void main( String[] args )
     {
         //CollectorRequestActivator activator = new CollectorRequestActivator();
-        CollectorRequestActivator activator = new CollectorRequestActivator();
+        //CollectorRequestActivator activator = new CollectorRequestActivator();
 
         //System.out.println("Waiting for collector result...");
 
@@ -109,13 +115,66 @@ public class App
         */
 
         //String result = activator.activateRequestSync("hardware.cpu", Map.of("includeTemperature", true, "coreInfo", true ));
-        String s = activator.activateRequestSync("generic.test", Map.of());
-        System.out.println(s);
+        /*String s = activator.activateRequestSync("generic.test", Map.of());
+        System.out.println(s);*/
         /*try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();    
         }*/
+
+
+
+
+
+
+
+
+        //TODO: Fix simple heartbeat, run infinite a function
+
+        //TODO: implement streaming execution for single and multiple collectors
+
+        //TODO:add cron jobs
+
+        
+
+        //───────────────────────────────────────────────────────────────────────────────
+        // ── Testing Streming ──────────────────────────────────────────────────────────
+
+  
+        CollectorRequestActivator activator = new CollectorRequestActivator();
+        StreamerRequestActivator streamer = new StreamerRequestActivator(activator);
+
+        // ── Simple heartbeat ──────────────────────────────────────────────────────────
+        UUID id = streamer.heartbeat(
+            "generic.test",
+            Map.of("value1", false),
+            result -> System.out.println("Got: " + result),
+            StopCondition.whenResultContains("STOP")
+                .or(StopCondition.afterCount(100))
+        );
+
+
+        //───────────────────────────────────────────────────────────────────────────────
+
+        // // ── Cron-scheduled task ───────────────────────────────────────────────────────
+        // UUID cronId = streamer.stream(StreamSpec.builder("hardware.cpu")
+        //     .trigger(StreamTrigger.cron("*/30 * * * *"))   // every 30 minutes
+        //     .stopCondition(StopCondition.afterDuration(Duration.ofHours(6)))
+        //     .onEmit(result -> log.info("CPU snapshot: {}", result))
+        //     .onStop(stoppedId -> log.info("CPU stream {} ended", stoppedId))
+        //     .build());
+
+        // // ── Composed stop condition ───────────────────────────────────────────────────
+        // StopCondition condition = StopCondition.afterCount(50)
+        //     .or(StopCondition.afterDuration(Duration.ofMinutes(10)))
+        //     .or(StopCondition.whenResultMatches(r -> r.contains("\"success\":false")));
+
+        // // ── Management ────────────────────────────────────────────────────────────────
+        // streamer.stop(id);
+        // Set<UUID> active = streamer.listActive();
+        // List<String> queued = streamer.drain(cronId);
+
         
     }
 }
