@@ -6,9 +6,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import org.quartz.Scheduler;
 
+import io.github.xseejx.colletctorframework.core.engine.SchedulerProvider;
+import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
 import io.github.xseejx.colletctorframework.core.service.ServiceManager;
 import io.github.xseejx.colletctorframework.core.service.ServiceModel;
+import io.github.xseejx.colletctorframework.core.service.TaskManager;
+import io.github.xseejx.colletctorframework.core.service.TaskModel;
 
 /**
  * Test Application for the Collector Framework. 
@@ -23,15 +28,14 @@ public class App
     {
 
 
-        //TODO: add function service.begin() and service.end()
         //ServiceManager activator = new ServiceManager();
-        ServiceManager activator = ServiceManager.begin();
+        //ServiceManager activator = ServiceManager.begin();
         //ServiceManager service = 
         //CollectorRequestActivator activator = new CollectorRequestActivator();
 
         //System.out.println("Waiting for collector result...");
 
-        String s = activator.activateServiceSync("generic.test", Map.of(
+        /*String s = activator.activateServiceSync("generic.test", Map.of(
             "value1", false
         ));
         List<String> available = activator.listAvailable();
@@ -96,10 +100,10 @@ public class App
         */
 
         // Try multiple async requests
-        List<Map<String, Map<String, Object>>> requests1 = List.of(
+       /* List<Map<String, Map<String, Object>>> requests1 = List.of(
             Map.of("generic.test", Map.of("value1", true, "valaue2", "Test1")),
             Map.of("hardware.cpu", Map.of("includePerCore", true, "includeTemeperature", false))
-        );
+        );*/
 /*
        activator.activateRequestsAsync(requests).thenAccept(res2 -> {
 
@@ -107,16 +111,16 @@ public class App
         });*/
         
         
-        List<CompletableFuture<String>> futures = activator.activateServicesAsync(requests1);
+        //List<CompletableFuture<String>> futures = activator.activateServicesAsync(requests1);
 
-        futures.forEach(f ->
+       /* futures.forEach(f ->
             f.thenAccept(res -> {
                 System.out.println("Async Result: " + res);
             })
-        );
+        );*/
 
 
-        activator.end();
+        //activator.end();
         
 
         //String result = activator.activateRequestSync("hardware.cpu", Map.of("includeTemperature", true, "coreInfo", true ));
@@ -180,6 +184,50 @@ public class App
         // Set<UUID> active = streamer.listActive();
         // List<String> queued = streamer.drain(cronId);
 
+
+
         
+
+       
+        
+
+        TaskManager manager = new TaskManager();
+
+        System.out.println("Creating two tasks in ConsoleDispatcher...");
+        String task2 = manager.createTask(new TaskModel(
+            "generic.test",
+            Map.of("value1", true, "value2", "Hello"),
+            "0/5 * * * * ?",
+            "system"
+        ));
+
+        String task1 = manager.createTask(new TaskModel(
+            "hardware.cpu",
+            Map.of("includePerCore", true, "includeTemperature", false),
+            "system"
+        ));
+
+
+        System.out.println("Created tasks: " + task1 + ", " + task2);
+        System.out.println("Waiting for scheduled executions...");
+
+        try {
+            Thread.sleep(12000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        System.out.println("Deleting task: " + task2);
+        //boolean deleted = manager.deleteTask(task2, "system");
+        //System.out.println("Delete result: " + deleted);
+
+        try {
+            Thread.sleep(8000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        manager.shutdown();
+        System.out.println("Collector scheduling demo complete.");
     }
 }

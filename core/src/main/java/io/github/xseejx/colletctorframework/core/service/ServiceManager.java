@@ -38,9 +38,7 @@ public class ServiceManager {
             } catch (Exception e) {
                 jsonResponse.set("{\"error\": \"" + e.getMessage() + "\"}");
             }
-            //engine.shutdown();
         });
-
         return jsonResponse.get(); 
     }
 
@@ -54,14 +52,10 @@ public class ServiceManager {
         listAvailable();
 
         ServiceModel request = new ServiceModel(collectorName, parameters);
-        //CollectorEngine engine = new CollectorEngine(registry);
-
 
         return engine.executeAsync(request)
             .thenApply(res -> res.getResult().toJSONString())
             .exceptionally(e -> "{\"error\": \"" + e.getMessage() + "\"}");
-            //.whenComplete((r, e) -> engine.shutdown());
-  
     }
 
     //TODO: must return a json array of results with collector name and result or error for each request
@@ -150,9 +144,6 @@ public class ServiceManager {
         return List.of(resultsJson.get());
     } 
 
-
-
-    
     /**
      * Get metadata information about a collector, such as description and tags.
      * @param collectorName
