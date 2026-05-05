@@ -15,7 +15,7 @@ import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
 public class ServiceManager {
 
     private final CollectorRegistry registry = new CollectorRegistry();
-
+    private final CollectorEngine engine = new CollectorEngine(registry);
     public String activateServiceSync(String collectorName, Map<String, Object> parameters) {
         listAvailable();
         
@@ -23,7 +23,7 @@ public class ServiceManager {
         AtomicReference<String> jsonResponse = new AtomicReference<>("{}");
         
         registry.get(collectorName).ifPresent(collector -> {
-            CollectorEngine engine = new CollectorEngine(registry);
+            
             Future<CollectorResult> result = engine.executeSync(request);
             try {
                 CollectorResult res = result.get();
@@ -31,7 +31,7 @@ public class ServiceManager {
             } catch (Exception e) {
                 jsonResponse.set("{\"error\": \"" + e.getMessage() + "\"}");
             }
-            engine.shutdown();
+            //engine.shutdown();
         });
 
         return jsonResponse.get(); 
@@ -42,13 +42,13 @@ public class ServiceManager {
         listAvailable();
 
         ServiceModel request = new ServiceModel(collectorName, parameters);
-        CollectorEngine engine = new CollectorEngine(registry);
+        //CollectorEngine engine = new CollectorEngine(registry);
 
 
         return engine.executeAsync(request)
             .thenApply(res -> res.getResult().toJSONString())
-            .exceptionally(e -> "{\"error\": \"" + e.getMessage() + "\"}")
-            .whenComplete((r, e) -> engine.shutdown());
+            .exceptionally(e -> "{\"error\": \"" + e.getMessage() + "\"}");
+            //.whenComplete((r, e) -> engine.shutdown());
   
     }
 
@@ -59,7 +59,7 @@ public class ServiceManager {
 
         List<CompletableFuture<String>> futures = new ArrayList<>();
 
-        CollectorEngine engine = new CollectorEngine(registry);
+       // CollectorEngine engine = new CollectorEngine(registry);
         
 
         for (Map<String, Map<String, Object>> request : requests) {
@@ -116,7 +116,7 @@ public class ServiceManager {
         });
 
         // Execute valid collectors
-        CollectorEngine engine = new CollectorEngine(registry);
+        //CollectorEngine engine = new CollectorEngine(registry);
         Map<String, Future<CollectorResult>> futures = engine.executeAllSync(serviceRequests);
 
         futures.forEach((name, result) -> {
@@ -143,7 +143,7 @@ public class ServiceManager {
                 });
             }
         });
-        engine.shutdown();
+        //engine.shutdown();
 
         return List.of(resultsJson.get());
     } 
@@ -170,6 +170,15 @@ public class ServiceManager {
     public List<String> listAvailable() {
         registry.discoverAll();
         return registry.listAvailable().stream().sorted().toList();
+    }
+
+
+    public static ServiceManager begin() {
+        return new ServiceManager();
+    }
+
+    public void end() {
+        engine.shutdown();
     }
 
 }

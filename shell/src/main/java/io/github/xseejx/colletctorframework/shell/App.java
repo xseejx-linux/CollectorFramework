@@ -21,30 +21,34 @@ public class App
 {
     public static void main( String[] args )
     {
-        ServiceManager activator = new ServiceManager();
+
+
+        //TODO: add function service.begin() and service.end()
+        //ServiceManager activator = new ServiceManager();
+        ServiceManager activator = ServiceManager.begin();
+        //ServiceManager service = 
         //CollectorRequestActivator activator = new CollectorRequestActivator();
 
         //System.out.println("Waiting for collector result...");
 
-        /*String s = activator.activateRequest("generic.test", Map.of(
+        String s = activator.activateServiceSync("generic.test", Map.of(
             "value1", false
-        ));*/
-        /*List<String> available = activator.listAvailable();
-        System.out.println("Available collectors: " + available);*/
-/* 
+        ));
+        List<String> available = activator.listAvailable();
+        System.out.println("Available collectors: " + available);
+ 
         // pass a List<Map<String, Map<String, Object>>> to activate multiple collectors at once
         List<Map<String, Map<String, Object>>> requests = List.of(
            Map.of("generic.test", Map.of("value321", true, "value2", "Test1")),
            Map.of("hardware.cpu", Map.of("includePerCore", true))
         );
 
-        List<String> results = activator.activateRequestsSync(requests);
+        List<String> results = activator.activateServicesSync(requests);
         
         // If Collector Name is wrong then nothing happens
 
 
         System.out.println("Results: " + results);
-        */
         //System.out.println("Collector execution completed.");
 
         //System.out.println("Collector result: " + s);
@@ -92,7 +96,7 @@ public class App
         */
 
         // Try multiple async requests
-        List<Map<String, Map<String, Object>>> requests = List.of(
+        List<Map<String, Map<String, Object>>> requests1 = List.of(
             Map.of("generic.test", Map.of("value1", true, "valaue2", "Test1")),
             Map.of("hardware.cpu", Map.of("includePerCore", true, "includeTemeperature", false))
         );
@@ -103,13 +107,16 @@ public class App
         });*/
         
         
-        /*List<CompletableFuture<String>> futures = activator.activateRequestsAsync(requests);
+        List<CompletableFuture<String>> futures = activator.activateServicesAsync(requests1);
 
         futures.forEach(f ->
             f.thenAccept(res -> {
                 System.out.println("Async Result: " + res);
             })
-        );*/
+        );
+
+
+        activator.end();
         
 
         //String result = activator.activateRequestSync("hardware.cpu", Map.of("includeTemperature", true, "coreInfo", true ));

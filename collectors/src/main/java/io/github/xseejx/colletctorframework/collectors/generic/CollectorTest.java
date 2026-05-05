@@ -44,7 +44,7 @@ public class CollectorTest implements Collector{
             result.put("Value1", value1);
             result.put("Value2", value2);
            
-            Thread.sleep(2000); // Simulate some delay
+            //Thread.sleep(2000); // Simulate some delay
             return CollectorResult.ok(getName(), result);
 
 
