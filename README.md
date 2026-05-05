@@ -125,3 +125,12 @@ No configuration files, no registry edits, no core code changes.
 - [QUICK_START.md](QUICK_START.md) — Command reference card
 - [AUTOMATION.md](AUTOMATION.md) — Build automation overview
 - `Makefile` — Run `make help` for all available targets
+
+## ToDo
+- [ ] Substitute RequestActivator with CollectorService (make service inside core and avoid usign request as name)
+- [ ] App → CollectorService → (Engine (as right now) OR Broker depending (to implement) on mode)
+- [ ] Streaming mode: returns a broker ()
+- [ ] Use one engine and reuse it: `CollectorEngine engine = new CollectorEngine(registry);`
+- [ ] Use `CompletableFuture.supplyAsync(() -> { ... }, threadPool)`
+- [ ] App.java (in shell) is like-app that can be anything, external app, outer server conencting to host, everything that want to use this framework.
+- [ ] Implement RabbitMQ as your App.Java
