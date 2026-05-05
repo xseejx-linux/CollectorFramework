@@ -12,11 +12,9 @@ public class ServiceModel {
         this.parameters = parameters;
     }
 
-
     public Map<String, Object> getParameters() {
         return parameters;
     }
-    // get the name of the collector name + parameters
 
     public String getCollectorName() {
         return collectorName;

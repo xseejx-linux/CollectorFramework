@@ -11,11 +11,18 @@ import io.github.xseejx.colletctorframework.core.api.CollectorResult;
 import io.github.xseejx.colletctorframework.core.engine.CollectorEngine;
 import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
 
-//TODO: Later improvement: one long-lived engine, one shared thread pool,per-request execution through that engine
+
 public class ServiceManager {
 
     private final CollectorRegistry registry = new CollectorRegistry();
     private final CollectorEngine engine = new CollectorEngine(registry);
+
+    /**
+     * Activate a single collector synchronously, with optional parameters.
+     * @param collectorName
+     * @param parameters
+     * @return
+     */
     public String activateServiceSync(String collectorName, Map<String, Object> parameters) {
         listAvailable();
         
@@ -37,7 +44,12 @@ public class ServiceManager {
         return jsonResponse.get(); 
     }
 
-
+    /**
+     * Activate a single collector asynchronously, with optional parameters.
+     * @param collectorName
+     * @param parameters
+     * @return
+     */
     public CompletableFuture<String> activateServiceAsync(String collectorName, Map<String, Object> parameters) {
         listAvailable();
 
@@ -54,14 +66,9 @@ public class ServiceManager {
 
     //TODO: must return a json array of results with collector name and result or error for each request
     public List<CompletableFuture<String>> activateServicesAsync(List<Map<String, Map<String, Object>>> requests) {
-
         listAvailable();
-
         List<CompletableFuture<String>> futures = new ArrayList<>();
-
-       // CollectorEngine engine = new CollectorEngine(registry);
-        
-
+     
         for (Map<String, Map<String, Object>> request : requests) {
 
             String collectorName = request.keySet().iterator().next();
@@ -69,9 +76,7 @@ public class ServiceManager {
 
             CompletableFuture<String> future = registry.get(collectorName)
                 .map(collector -> {
-
                     ServiceModel serviceRequest = new ServiceModel(collectorName, parameters);
-
                     return engine.executeAsync(serviceRequest)
                         .thenApply(res -> {
                             return "{\"collector\": \"" + collectorName +
@@ -83,7 +88,6 @@ public class ServiceManager {
                                 "\", \"error\": \"" +
                                 e.getMessage() + "\"}";
                         });
-
                 })
                 .orElseGet(() -> CompletableFuture.completedFuture(
                     "{\"collector\": \"" + collectorName +
@@ -95,7 +99,11 @@ public class ServiceManager {
         return futures;
     }
 
-
+    /**
+     * Activate multiple collectors synchronously, with optional parameters.
+     * @param requests
+     * @return
+     */
     public List<String> activateServicesSync(List<Map<String, Map<String, Object>>> requests) {
         listAvailable();
         List<ServiceModel> serviceRequests = new ArrayList<>();
@@ -106,17 +114,13 @@ public class ServiceManager {
             String collectorName = request.entrySet().iterator().next().getKey();
             Map<String, Object> parameters = request.get(collectorName);
 
-            
-
             registry.get(collectorName).ifPresentOrElse((collector -> {
                 serviceRequests.add(new ServiceModel(collectorName, parameters));
             }), () -> {
                 return;
             });
         });
-
         // Execute valid collectors
-        //CollectorEngine engine = new CollectorEngine(registry);
         Map<String, Future<CollectorResult>> futures = engine.executeAllSync(serviceRequests);
 
         futures.forEach((name, result) -> {
@@ -143,15 +147,17 @@ public class ServiceManager {
                 });
             }
         });
-        //engine.shutdown();
-
         return List.of(resultsJson.get());
     } 
 
 
 
-    // Utils
-
+    
+    /**
+     * Get metadata information about a collector, such as description and tags.
+     * @param collectorName
+     * @return
+     */
     public List<String> getMetada(String collectorName) {
         listAvailable();
         List<String> results = new ArrayList<>();
@@ -165,20 +171,27 @@ public class ServiceManager {
         return results;
     }
 
-
-
+    /**
+     * List all available collectors that can be executed.
+     * @return
+     */
     public List<String> listAvailable() {
         registry.discoverAll();
         return registry.listAvailable().stream().sorted().toList();
     }
 
-
+    /**
+     * Begin a service manager session.
+     * @return
+     */
     public static ServiceManager begin() {
         return new ServiceManager();
     }
 
+    /**
+     * End the service manager session, shutting down any resources.
+     */
     public void end() {
         engine.shutdown();
     }
-
 }

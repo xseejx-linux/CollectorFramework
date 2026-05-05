@@ -25,15 +25,20 @@ public class CollectorEngine {
     private final CollectorRegistry registry;
     private final ExecutorService threadPool;
 
+    /**
+     * Constructor for CollectorEngine, takes a CollectorRegistry to look up collectors.
+     * @param registry
+     */
     public CollectorEngine(CollectorRegistry registry) {
         this.registry   = registry;
         this.threadPool = Executors.newCachedThreadPool();
     }
 
     /**
-     * Execute a single named collector, with optional parameter injection.
-     */
-    //TODO: executeSync() 
+     * Synchronously execute a single named collector, with optional parameter injection.
+     * @param request
+     * @return
+     */ 
     public Future<CollectorResult> executeSync(ServiceModel request) {
         return threadPool.submit(() -> {
             Collector collector = registry.get(request.getCollectorName())
@@ -73,10 +78,8 @@ public class CollectorEngine {
 
     /**
      * Execute multiple collectors in parallel, return all results.
-     * 
      * @param requests
      */
-    //TODO: executeAllSync
     public Map<String, Future<CollectorResult>> executeAllSync(List<ServiceModel> requests) {
         Map<String, Future<CollectorResult>> futures = new LinkedHashMap<>();
         for (ServiceModel req : requests) {
@@ -85,11 +88,10 @@ public class CollectorEngine {
         return futures;
     }
 
-
-
-
     /**
-     * Reflectively set fields on a collector before invocation.
+     * Use reflection to inject parameters into collector fields before execution.
+     * @param collector
+     * @param params
      */
     private void injectParameters(Collector collector, Map<String, Object> params) {
         if (params == null || params.isEmpty()) return;
@@ -106,6 +108,9 @@ public class CollectorEngine {
         }
     }
 
+    /**
+     * Shutdown the engine and its thread pool.
+     */
     public void shutdown() {
         threadPool.shutdown();
     }
