@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
-import io.github.xseejx.colletctorframework.core.request.CollectorRequest;
+import io.github.xseejx.colletctorframework.core.service.ServiceModel;
 import io.github.xseejx.colletctorframework.core.api.Collector;
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
 
@@ -34,7 +34,7 @@ public class CollectorEngine {
      * Execute a single named collector, with optional parameter injection.
      */
     //TODO: executeSync() 
-    public Future<CollectorResult> execute(CollectorRequest request) {
+    public Future<CollectorResult> executeSync(ServiceModel request) {
         return threadPool.submit(() -> {
             Collector collector = registry.get(request.getCollectorName())
                 .orElseThrow(() -> new CollectorNotFoundException(request.getCollectorName()));
@@ -55,7 +55,7 @@ public class CollectorEngine {
      * @param request
      * @return CompletableFuture<CollectorResult>
      */
-    public CompletableFuture<CollectorResult> executeAsync(CollectorRequest request) {
+    public CompletableFuture<CollectorResult> executeAsync(ServiceModel request) {
         return CompletableFuture.supplyAsync(() -> {
             Collector collector = registry.get(request.getCollectorName())
                 .orElseThrow(() -> new CollectorNotFoundException(request.getCollectorName()));
@@ -77,10 +77,10 @@ public class CollectorEngine {
      * @param requests
      */
     //TODO: executeAllSync
-    public Map<String, Future<CollectorResult>> executeAll(List<CollectorRequest> requests) {
+    public Map<String, Future<CollectorResult>> executeAllSync(List<ServiceModel> requests) {
         Map<String, Future<CollectorResult>> futures = new LinkedHashMap<>();
-        for (CollectorRequest req : requests) {
-            futures.put(req.getCollectorName(), execute(req));
+        for (ServiceModel req : requests) {
+            futures.put(req.getCollectorName(), executeSync(req));
         }
         return futures;
     }

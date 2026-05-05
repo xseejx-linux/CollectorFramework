@@ -6,11 +6,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import io.github.xseejx.colletctorframework.core.engine.stream.StopCondition;
-import io.github.xseejx.colletctorframework.core.engine.stream.StreamSpec;
-import io.github.xseejx.colletctorframework.core.engine.stream.StreamTrigger;
-import io.github.xseejx.colletctorframework.core.request.CollectorRequestActivator;
-import io.github.xseejx.colletctorframework.core.request.StreamerRequestActivator;
+
+import io.github.xseejx.colletctorframework.core.service.ServiceManager;
+import io.github.xseejx.colletctorframework.core.service.ServiceModel;
 
 /**
  * Test Application for the Collector Framework. 
@@ -23,7 +21,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        //CollectorRequestActivator activator = new CollectorRequestActivator();
+        ServiceManager activator = new ServiceManager();
         //CollectorRequestActivator activator = new CollectorRequestActivator();
 
         //System.out.println("Waiting for collector result...");
@@ -94,25 +92,25 @@ public class App
         */
 
         // Try multiple async requests
-        /*List<Map<String, Map<String, Object>>> requests = List.of(
-            Map.of("generic.testing", Map.of("value100", true, "valaue2", "Test1")),
+        List<Map<String, Map<String, Object>>> requests = List.of(
+            Map.of("generic.test", Map.of("value1", true, "valaue2", "Test1")),
             Map.of("hardware.cpu", Map.of("includePerCore", true, "includeTemeperature", false))
-        );*/
-
-       /* activator.activateRequestsAsync(requests).thenAccept(res2 -> {
+        );
+/*
+       activator.activateRequestsAsync(requests).thenAccept(res2 -> {
 
             res2.forEach(System.out::println);
         });*/
         
-        /*
-        List<CompletableFuture<String>> futures = activator.activateRequestsAsync(requests);
+        
+        /*List<CompletableFuture<String>> futures = activator.activateRequestsAsync(requests);
 
         futures.forEach(f ->
             f.thenAccept(res -> {
                 System.out.println("Async Result: " + res);
             })
-        );
-        */
+        );*/
+        
 
         //String result = activator.activateRequestSync("hardware.cpu", Map.of("includeTemperature", true, "coreInfo", true ));
         /*String s = activator.activateRequestSync("generic.test", Map.of());
@@ -141,7 +139,7 @@ public class App
         //───────────────────────────────────────────────────────────────────────────────
         // ── Testing Streming ──────────────────────────────────────────────────────────
 
-  
+  /* 
         CollectorRequestActivator activator = new CollectorRequestActivator();
         StreamerRequestActivator streamer = new StreamerRequestActivator(activator);
 
@@ -154,7 +152,7 @@ public class App
                 .or(StopCondition.afterCount(100))
         );
 
-
+*/
         //───────────────────────────────────────────────────────────────────────────────
 
         // // ── Cron-scheduled task ───────────────────────────────────────────────────────

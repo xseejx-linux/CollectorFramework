@@ -1,4 +1,4 @@
-package io.github.xseejx.colletctorframework.core.request;
+package io.github.xseejx.colletctorframework.core.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +12,19 @@ import io.github.xseejx.colletctorframework.core.engine.CollectorEngine;
 import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
 
 //TODO: Later improvement: one long-lived engine, one shared thread pool,per-request execution through that engine
-public class CollectorRequestActivator {
+public class ServiceManager {
 
     private final CollectorRegistry registry = new CollectorRegistry();
 
-    public String activateRequestSync(String collectorName, Map<String, Object> parameters) {
+    public String activateServiceSync(String collectorName, Map<String, Object> parameters) {
         listAvailable();
         
-        CollectorRequest request = new CollectorRequest(collectorName, parameters);
+        ServiceModel request = new ServiceModel(collectorName, parameters);
         AtomicReference<String> jsonResponse = new AtomicReference<>("{}");
         
         registry.get(collectorName).ifPresent(collector -> {
             CollectorEngine engine = new CollectorEngine(registry);
-            Future<CollectorResult> result = engine.execute(request);
+            Future<CollectorResult> result = engine.executeSync(request);
             try {
                 CollectorResult res = result.get();
                 jsonResponse.set(res.getResult().toJSONString());
@@ -38,10 +38,10 @@ public class CollectorRequestActivator {
     }
 
 
-    public CompletableFuture<String> activateRequestAsync(String collectorName, Map<String, Object> parameters) {
+    public CompletableFuture<String> activateServiceAsync(String collectorName, Map<String, Object> parameters) {
         listAvailable();
 
-        CollectorRequest request = new CollectorRequest(collectorName, parameters);
+        ServiceModel request = new ServiceModel(collectorName, parameters);
         CollectorEngine engine = new CollectorEngine(registry);
 
 
@@ -53,7 +53,7 @@ public class CollectorRequestActivator {
     }
 
     //TODO: must return a json array of results with collector name and result or error for each request
-    public List<CompletableFuture<String>> activateRequestsAsync(List<Map<String, Map<String, Object>>> requests) {
+    public List<CompletableFuture<String>> activateServicesAsync(List<Map<String, Map<String, Object>>> requests) {
 
         listAvailable();
 
@@ -70,10 +70,9 @@ public class CollectorRequestActivator {
             CompletableFuture<String> future = registry.get(collectorName)
                 .map(collector -> {
 
-                    CollectorRequest collectorRequest =
-                        new CollectorRequest(collectorName, parameters);
+                    ServiceModel serviceRequest = new ServiceModel(collectorName, parameters);
 
-                    return engine.executeAsync(collectorRequest)
+                    return engine.executeAsync(serviceRequest)
                         .thenApply(res -> {
                             return "{\"collector\": \"" + collectorName +
                                 "\", \"result\": " +
@@ -97,14 +96,9 @@ public class CollectorRequestActivator {
     }
 
 
-
-    
-    
-    
-
-    public List<String> activateRequestsSync(List<Map<String, Map<String, Object>>> requests) {
+    public List<String> activateServicesSync(List<Map<String, Map<String, Object>>> requests) {
         listAvailable();
-        List<CollectorRequest> collectorRequests = new ArrayList<>();
+        List<ServiceModel> serviceRequests = new ArrayList<>();
         AtomicReference<String> resultsJson = new AtomicReference<>("[]");
 
         // Process requests and separate collectors from errors
@@ -115,7 +109,7 @@ public class CollectorRequestActivator {
             
 
             registry.get(collectorName).ifPresentOrElse((collector -> {
-                collectorRequests.add(new CollectorRequest(collectorName, parameters));
+                serviceRequests.add(new ServiceModel(collectorName, parameters));
             }), () -> {
                 return;
             });
@@ -123,7 +117,7 @@ public class CollectorRequestActivator {
 
         // Execute valid collectors
         CollectorEngine engine = new CollectorEngine(registry);
-        Map<String, Future<CollectorResult>> futures = engine.executeAll(collectorRequests);
+        Map<String, Future<CollectorResult>> futures = engine.executeAllSync(serviceRequests);
 
         futures.forEach((name, result) -> {
             try {
@@ -154,6 +148,9 @@ public class CollectorRequestActivator {
         return List.of(resultsJson.get());
     } 
 
+
+
+    // Utils
 
     public List<String> getMetada(String collectorName) {
         listAvailable();
