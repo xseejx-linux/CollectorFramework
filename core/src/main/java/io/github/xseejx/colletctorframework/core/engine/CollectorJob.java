@@ -5,6 +5,8 @@ import java.util.Map;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
@@ -14,7 +16,11 @@ import io.github.xseejx.colletctorframework.core.service.ConsoleDispatcher;
 import io.github.xseejx.colletctorframework.core.service.ServiceModel;
 
 public class CollectorJob extends QuartzJobBean {
+    private static final Logger logger = LoggerFactory.getLogger(CollectorEngine.class);
 
+    private final CollectorRegistry registry = new CollectorRegistry();
+    private final CollectorEngine engine = new CollectorEngine(registry);
+        
     /**
      * This method is called when the scheduled job is triggered.
      * It retrieves the collector name and parameters from the job data map,
@@ -26,25 +32,26 @@ public class CollectorJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         JobDataMap dataMap = context.getMergedJobDataMap();
         String collectorName = dataMap.getString("CollectorName");
+
         @SuppressWarnings("unchecked")
         Map<String, Object> parameters = (Map<String, Object>) dataMap.get("Parameters");
 
-        CollectorRegistry registry = new CollectorRegistry();
-        registry.discoverAll();
-
-        CollectorEngine engine = new CollectorEngine(registry);
+        registry.discoverAll();        
 
         try {
             CollectorResult result = engine.executeSync(new ServiceModel(collectorName, parameters)).get();
             //TODO: Dispacther make it dynamic
             ResultDispatcher dispatcher = new ConsoleDispatcher();
+            
             String taskId = context.getJobDetail().getKey().getName();
             String groupName = context.getJobDetail().getKey().getGroup();
+            
             dispatcher.dispatch(taskId, groupName, result);
         } catch (Exception e) {
             String taskId = context.getJobDetail().getKey().getName();
             String groupName = context.getJobDetail().getKey().getGroup();
-            System.err.println("[CollectorJob] Failed to execute task [" + groupName + "/" + taskId + "]: " + e.getMessage());
+            
+            logger.error("[CollectorJob] Failed to execute task [{}/{}]: {}", groupName, taskId, e.getMessage());
         } finally {
             engine.shutdown();
         }

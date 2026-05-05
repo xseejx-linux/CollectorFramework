@@ -1,7 +1,5 @@
 package io.github.xseejx.colletctorframework.core.service;
 
-import java.util.List;
-
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 

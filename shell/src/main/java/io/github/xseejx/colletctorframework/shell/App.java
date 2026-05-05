@@ -32,7 +32,6 @@ public class App
         //ServiceManager activator = ServiceManager.begin();
         //ServiceManager service = 
         //CollectorRequestActivator activator = new CollectorRequestActivator();
-
         //System.out.println("Waiting for collector result...");
 
         /*String s = activator.activateServiceSync("generic.test", Map.of(
@@ -139,12 +138,6 @@ public class App
 
 
 
-        //TODO: Fix simple heartbeat, run infinite a function
-
-        //TODO: implement streaming execution for single and multiple collectors
-
-        //TODO:add cron jobs
-
         
 
         //───────────────────────────────────────────────────────────────────────────────
@@ -197,7 +190,7 @@ public class App
         String task2 = manager.createTask(new TaskModel(
             "generic.test",
             Map.of("value1", true, "value2", "Hello"),
-            "0/5 * * * * ?",
+            "* * * * * ?",
             "system"
         ));
 

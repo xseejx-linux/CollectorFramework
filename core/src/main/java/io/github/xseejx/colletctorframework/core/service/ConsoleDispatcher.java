@@ -4,8 +4,13 @@ import io.github.xseejx.colletctorframework.core.api.CollectorResult;
 import io.github.xseejx.colletctorframework.core.api.ResultDispatcher;
 import org.json.simple.JSONObject;
 
+/**
+ * A simple implementation of ResultDispatcher that prints the result to the console.
+ * Used in Testing
+ */
 public class ConsoleDispatcher implements ResultDispatcher {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void dispatch(String taskId, String groupName, CollectorResult result) {
         JSONObject payload = new JSONObject();

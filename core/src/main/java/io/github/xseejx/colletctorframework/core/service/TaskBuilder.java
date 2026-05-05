@@ -1,23 +1,21 @@
 package io.github.xseejx.colletctorframework.core.service;
 
 
-import java.time.ZonedDateTime;
-import java.util.Date;
+
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
+
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
+
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 
 import io.github.xseejx.colletctorframework.core.engine.CollectorJob;
-import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
 
-public class TaskBuilder {
+
+class TaskBuilder {
 
     /**
      * Builds a JobDetail object based on the provided TaskModel.
