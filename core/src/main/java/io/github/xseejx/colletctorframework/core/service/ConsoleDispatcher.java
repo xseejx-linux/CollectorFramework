@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
  * A simple implementation of ResultDispatcher that prints the result to the console.
  * Used in Testing
  */
+//TODO: move inside package dispatcher
 public class ConsoleDispatcher implements ResultDispatcher {
 
     @SuppressWarnings("unchecked")
