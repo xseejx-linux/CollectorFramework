@@ -33,6 +33,7 @@ public class CollectorEngine {
     /**
      * Execute a single named collector, with optional parameter injection.
      */
+    //TODO: executeSync() 
     public Future<CollectorResult> execute(CollectorRequest request) {
         return threadPool.submit(() -> {
             Collector collector = registry.get(request.getCollectorName())
@@ -75,6 +76,7 @@ public class CollectorEngine {
      * 
      * @param requests
      */
+    //TODO: executeAllSync
     public Map<String, Future<CollectorResult>> executeAll(List<CollectorRequest> requests) {
         Map<String, Future<CollectorResult>> futures = new LinkedHashMap<>();
         for (CollectorRequest req : requests) {
