@@ -128,10 +128,12 @@ No configuration files, no registry edits, no core code changes.
 
 ## ToDo
 - [x] Substitute RequestActivator with CollectorService (make service inside core and avoid usign request as name)
-- [ ] App → CollectorService → (Engine (as right now) OR Broker depending (to implement) on mode)
-- [ ] Quartz → produces messages → Broker → workers consume
-- [ ] Streaming mode: returns a broker ()
-- [ ] Use one engine and reuse it: `CollectorEngine engine = new CollectorEngine(registry);`
+- [X] App → CollectorService → (Engine (as right now) OR Broker depending (to implement) on mode)
+- [X] Quartz → produces messages → Broker → workers consume
+- [X] Use one engine and reuse it: `CollectorEngine engine = new CollectorEngine(registry);`
 - [x] Use `CompletableFuture.supplyAsync(() -> { ... }, threadPool)`
-- [ ] App.java (in shell) is like-app that can be anything, external app, outer server conencting to host, everything that want to use this framework.
-- [ ] Implement RabbitMQ as your App.Java
+- [X] App.java (in shell) is like-app that can be anything, external app, outer server conencting to host, everything that want to use this framework.
+- [ ] Select dispatcher dynamically via `TaskModel` (choose it like for collectors)
+- [ ] (optional) Try implementing RabbitMQ
+- [ ] Add module-info
+- [ ] Remove shell package, it will be an external project 
