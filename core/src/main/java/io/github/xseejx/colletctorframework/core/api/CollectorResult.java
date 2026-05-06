@@ -12,6 +12,14 @@ public class CollectorResult {
 
     private final Instant timestamp;
 
+    /**
+     * Constructor for CollectorResult.
+     * @param collectorName
+     * @param json
+     * @param success
+     * @param errorMessage
+     * @param timestamp
+     */
     CollectorResult(String collectorName, JSONObject json, boolean success, JSONObject errorMessage, Instant timestamp) {
         this.collectorName = collectorName;
         this.json = json;
@@ -20,7 +28,12 @@ public class CollectorResult {
         this.timestamp = timestamp;
     }
 
-
+    /**
+     * Factory method for success result.
+     * @param name
+     * @param result
+     * @return
+     */
     public static CollectorResult ok(String name, JSONObject result) {
         String collectorName = name;
         JSONObject json = result;
@@ -32,7 +45,12 @@ public class CollectorResult {
 
 
 
-
+    /**
+     * Factory method for failure result.
+     * @param name
+     * @param result
+     * @return
+     */
     public static CollectorResult failure(String name, JSONObject result) {
         String collectorName = name;
         JSONObject json = null;
@@ -42,6 +60,11 @@ public class CollectorResult {
         return new CollectorResult(collectorName, json, success, errorMessage, timestamp);
     }
 
+
+    /**
+     * Convert this CollectorResult to a JSON object for output.
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public JSONObject getResult() {
         JSONObject result = new JSONObject();

@@ -22,6 +22,7 @@
   <modules>
     <module>core</module>
     <module>collectors</module>
+    <module>connector</module>
     <module>shell</module>
   </modules>
 
