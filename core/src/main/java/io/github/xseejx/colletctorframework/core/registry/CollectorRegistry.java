@@ -34,17 +34,14 @@ public class CollectorRegistry {
             .collect(Collectors.toSet());
     }
 
-
     public void discoverAll() {
 
         ServiceLoader<Collector> loader = ServiceLoader.load(Collector.class);
 
         for (Collector c : loader) {
             try {
-                System.out.println("Loaded: " + c.getClass());
                 register(c);
             } catch (ServiceConfigurationError e) {
-                System.err.println("Failed to load collector provider: " + e.getMessage());
             }
         }
     }

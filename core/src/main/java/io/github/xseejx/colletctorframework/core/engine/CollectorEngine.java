@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -13,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
-import io.github.xseejx.colletctorframework.core.request.CollectorRequest;
+import io.github.xseejx.colletctorframework.core.service.ServiceModel;
 import io.github.xseejx.colletctorframework.core.api.Collector;
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
 
@@ -24,15 +25,21 @@ public class CollectorEngine {
     private final CollectorRegistry registry;
     private final ExecutorService threadPool;
 
+    /**
+     * Constructor for CollectorEngine, takes a CollectorRegistry to look up collectors.
+     * @param registry
+     */
     public CollectorEngine(CollectorRegistry registry) {
         this.registry   = registry;
         this.threadPool = Executors.newCachedThreadPool();
     }
 
     /**
-     * Execute a single named collector, with optional parameter injection.
-     */
-    public Future<CollectorResult> execute(CollectorRequest request) {
+     * Synchronously execute a single named collector, with optional parameter injection.
+     * @param request
+     * @return
+     */ 
+    public Future<CollectorResult> executeSync(ServiceModel request) {
         return threadPool.submit(() -> {
             Collector collector = registry.get(request.getCollectorName())
                 .orElseThrow(() -> new CollectorNotFoundException(request.getCollectorName()));
@@ -49,18 +56,42 @@ public class CollectorEngine {
     }
 
     /**
-     * Execute multiple collectors in parallel, return all results.
+     * Asynchronously execute a single named collector, with optional parameter injection.
+     * @param request
+     * @return CompletableFuture<CollectorResult>
      */
-    public Map<String, Future<CollectorResult>> executeAll(List<CollectorRequest> requests) {
+    public CompletableFuture<CollectorResult> executeAsync(ServiceModel request) {
+        return CompletableFuture.supplyAsync(() -> {
+            Collector collector = registry.get(request.getCollectorName())
+                .orElseThrow(() -> new CollectorNotFoundException(request.getCollectorName()));
+
+            if (!collector.isAvailable()) {
+                return CollectorResult.failure(request.getCollectorName(), new JSONObject());
+            }
+
+            injectParameters(collector, request.getParameters());
+
+            
+            return collector.collect();
+        });
+    }
+
+    /**
+     * Execute multiple collectors in parallel, return all results.
+     * @param requests
+     */
+    public Map<String, Future<CollectorResult>> executeAllSync(List<ServiceModel> requests) {
         Map<String, Future<CollectorResult>> futures = new LinkedHashMap<>();
-        for (CollectorRequest req : requests) {
-            futures.put(req.getCollectorName(), execute(req));
+        for (ServiceModel req : requests) {
+            futures.put(req.getCollectorName(), executeSync(req));
         }
         return futures;
     }
 
     /**
-     * Reflectively set fields on a collector before invocation.
+     * Use reflection to inject parameters into collector fields before execution.
+     * @param collector
+     * @param params
      */
     private void injectParameters(Collector collector, Map<String, Object> params) {
         if (params == null || params.isEmpty()) return;
@@ -77,7 +108,10 @@ public class CollectorEngine {
         }
     }
 
+    /**
+     * Shutdown the engine and its thread pool.
+     */
     public void shutdown() {
         threadPool.shutdown();
-    }
+    }   
 }

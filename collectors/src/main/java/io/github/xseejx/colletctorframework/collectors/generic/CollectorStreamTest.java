@@ -16,37 +16,37 @@ import org.json.simple.JSONObject;
 
 @AutoService(Collector.class)
 @CollectorMetadata(
-    name        = "generic.test",
+    name        = "stream.test",
     description = "A simple test collector",
     tags        = {"generic", "test"}
 )
 
-public class CollectorTest implements Collector{
-    private static final Logger logger = LoggerFactory.getLogger(CollectorTest.class);
+// Just a stupid collector for testing, like the others nothing special here :)
+public class CollectorStreamTest implements Collector{
+    private static final Logger logger = LoggerFactory.getLogger(CollectorStreamTest.class);
 
 
     // With reflective modify those values on core
     private boolean value1 = false;
-    private String value2 = "Test0";
+    private int value2 = 0;
 
+    
     @Override
-    public String getName() { return "generic.test"; }
+    public String getName() { return "stream.test"; }
 
     @SuppressWarnings("unchecked")
     @Override
     public CollectorResult collect() { 
         try {
-           
-            
 
+            value1 = !value1;
+            value2++;
 
             JSONObject result = new JSONObject();
             result.put("Value1", value1);
             result.put("Value2", value2);
-           
-            //Thread.sleep(2000); // Simulate some delay
-            return CollectorResult.ok(getName(), result);
 
+        return CollectorResult.ok("RandomCollector", result);
 
         } catch (Exception e) {
             logger.error("Error occurred while collecting Test information", e);
@@ -59,7 +59,7 @@ public class CollectorTest implements Collector{
     public Map<String, Class<?>> getAcceptedParameters() {
         return Map.of(
             "value1",  Boolean.class,
-            "value2",  String.class
+            "value2",  int.class
         );
     }
 
