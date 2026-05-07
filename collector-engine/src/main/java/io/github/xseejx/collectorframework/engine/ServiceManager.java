@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework;
+package io.github.xseejx.collectorframework.engine;
 
 // IMPORTS
 import java.lang.annotation.Annotation;
@@ -21,9 +21,9 @@ import io.github.xseejx.collectorframework.api.CollectorMetadata;
 import io.github.xseejx.collectorframework.api.CollectorMetadata.ParameterType;
 import io.github.xseejx.collectorframework.api.CollectorResult;
 // IMPORTS INTERNAL
-import io.github.xseejx.collectorframework.internal.CollectorEngine;
-import io.github.xseejx.collectorframework.internal.CollectorNotFoundException;
-import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
+import io.github.xseejx.collectorframework.engine.internal.CollectorEngine;
+import io.github.xseejx.collectorframework.engine.internal.CollectorNotFoundException;
+import io.github.xseejx.collectorframework.engine.internal.registry.CollectorRegistry;
 
 
 /**

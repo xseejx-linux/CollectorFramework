@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework.internal;
+package io.github.xseejx.collectorframework.engine.internal;
 
 /**
  * Class: CollectorNotFoundException

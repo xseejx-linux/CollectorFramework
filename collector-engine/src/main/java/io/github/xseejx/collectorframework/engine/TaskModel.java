@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework;
+package io.github.xseejx.collectorframework.engine;
 
 // IMPORTS
 import java.util.Map;
@@ -13,6 +13,7 @@ public class TaskModel {
     private final Map<String, Object> parameters;
     private final String cronExpression;
     private final String groupName;
+    private final String dispatcherName;
     private String desc = "Description";
 
     /**
@@ -22,22 +23,19 @@ public class TaskModel {
      * @param parameters
      */
     public TaskModel(String collectorName, Map<String, Object> parameters, String groupName) {
-        this.collectorName = collectorName;
-        this.parameters = parameters;
-        this.cronExpression = null;
-        this.groupName = groupName;
+        this(collectorName, parameters, null, groupName, "console");
     }
-    /**
-     * Constructor for creating a scheduled task with a cron expression
-     * @param collectorName
-     * @param parameters
-     * @param cronExpression
-     */
-    public TaskModel(String collectorName, Map<String, Object> parameters, String cronExpression, String groupName) {
+
+    public TaskModel(String collectorName, Map<String, Object> parameters, String groupName, String dispatcherName) {
+        this(collectorName, parameters, null, groupName, dispatcherName);
+    }
+
+    public TaskModel(String collectorName, Map<String, Object> parameters, String cronExpression, String groupName, String dispatcherName) {
         this.collectorName = collectorName;
         this.parameters = parameters;
         this.cronExpression = cronExpression;
         this.groupName = groupName;
+        this.dispatcherName = dispatcherName == null || dispatcherName.isBlank() ? "console" : dispatcherName;
     }
 
     public Map<String, Object> getParameters() {
@@ -54,6 +52,11 @@ public class TaskModel {
     public String getGroups() {
         return groupName;
     }
+
+    public String getDispatcherName() {
+        return dispatcherName;
+    }
+
     public String getDesc() {
         return desc;
     }

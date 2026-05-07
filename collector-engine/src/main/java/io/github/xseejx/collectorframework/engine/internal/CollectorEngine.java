@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework.internal;
+package io.github.xseejx.collectorframework.engine.internal;
 
 // IMPORTS
 import java.lang.reflect.Field;
@@ -16,8 +16,8 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 // IMPORTS INTERNAL
-import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
-import io.github.xseejx.collectorframework.ServiceModel;
+import io.github.xseejx.collectorframework.engine.internal.registry.CollectorRegistry;
+import io.github.xseejx.collectorframework.engine.ServiceModel;
 // IMPORTS API
 import io.github.xseejx.collectorframework.api.Collector;
 import io.github.xseejx.collectorframework.api.CollectorResult;

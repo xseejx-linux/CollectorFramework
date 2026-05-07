@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework.internal;
+package io.github.xseejx.collectorframework.engine.internal;
 
 // IMPORTS (Job)
 import org.quartz.JobDetail;
@@ -11,7 +11,7 @@ import org.quartz.impl.StdSchedulerFactory;
 // IMPORTS QUARTZ (Trigger)
 import org.quartz.Trigger;
 // IMPORTS INTERNAL
-import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
+import io.github.xseejx.collectorframework.engine.internal.registry.CollectorRegistry;
 
 /**
  * 

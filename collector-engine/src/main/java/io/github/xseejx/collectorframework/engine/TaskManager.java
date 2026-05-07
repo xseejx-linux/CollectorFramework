@@ -1,11 +1,12 @@
-package io.github.xseejx.collectorframework;
+package io.github.xseejx.collectorframework.engine;
 
 // IMPORTS QUARTZ (Job detail)
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 // IMPORTS INTERNAL 
-import io.github.xseejx.collectorframework.internal.SchedulerProvider;
-import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
+import io.github.xseejx.collectorframework.engine.internal.SchedulerProvider;
+import io.github.xseejx.collectorframework.engine.internal.registry.CollectorRegistry;
+import io.github.xseejx.collectorframework.engine.internal.registry.ResultDispatcherRegistry;
 
 /**
  * Class: TaskManager
@@ -15,6 +16,7 @@ import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
 public class TaskManager {
 
     private final CollectorRegistry registry = new CollectorRegistry();
+    private final ResultDispatcherRegistry dispatcherRegistry = new ResultDispatcherRegistry();
     private final TaskBuilder taskBuilder = new TaskBuilder();
     private final SchedulerProvider schedulerProvider = new SchedulerProvider();
 
@@ -26,10 +28,12 @@ public class TaskManager {
      */
     public String createTask(TaskModel model){
         listAvailable();
+        dispatcherRegistry.discoverAll();
         registry.get(model.getCollectorName())
             .orElseThrow(() -> new IllegalArgumentException("Collector not found"));
 
         JobDetail job = taskBuilder.buildTaskDetail(model);
+        job.getJobDataMap().put("DispatcherRegistry", dispatcherRegistry);
         Trigger trigger = taskBuilder.buildTrigger(job, model);
 
         schedulerProvider.scheduleJob(job, trigger, registry);

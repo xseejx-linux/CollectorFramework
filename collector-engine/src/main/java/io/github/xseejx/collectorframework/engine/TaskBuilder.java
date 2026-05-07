@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework;
+package io.github.xseejx.collectorframework.engine;
 
 
 // IMPORTS
@@ -11,7 +11,7 @@ import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 // IMPORTS INTERNAL 
-import io.github.xseejx.collectorframework.internal.CollectorJob;
+import io.github.xseejx.collectorframework.engine.internal.CollectorJob;
 
 /**
  * Class: TaskBuilder
@@ -37,6 +37,7 @@ class TaskBuilder {
 
         jobDataMap.put("CollectorName", model.getCollectorName());
         jobDataMap.put("Parameters", model.getParameters());
+        jobDataMap.put("DispatcherName", model.getDispatcherName());
 
         return JobBuilder.newJob(CollectorJob.class)
                 .withIdentity(UUID.randomUUID().toString(), model.getGroups())

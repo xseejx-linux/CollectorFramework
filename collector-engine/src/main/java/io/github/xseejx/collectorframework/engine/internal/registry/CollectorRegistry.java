@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework.internal.registry;
+package io.github.xseejx.collectorframework.engine.internal.registry;
 
 // IMPORTS
 import java.util.Map;

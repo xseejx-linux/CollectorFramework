@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework.internal;
+package io.github.xseejx.collectorframework.engine.internal;
 
 // IMPORTS
 import java.util.Map;
@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import io.github.xseejx.collectorframework.api.CollectorResult;
 import io.github.xseejx.collectorframework.api.ResultDispatcher;
 // IMPORTS INTERNAL
-import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
-import io.github.xseejx.collectorframework.ConsoleDispatcher;
-import io.github.xseejx.collectorframework.ServiceModel;
+import io.github.xseejx.collectorframework.engine.internal.registry.CollectorRegistry;
+import io.github.xseejx.collectorframework.engine.internal.registry.ResultDispatcherRegistry;
+import io.github.xseejx.collectorframework.engine.ServiceModel;
 
 /**
  * 
@@ -47,12 +47,15 @@ public class CollectorJob extends QuartzJobBean {
 
         try {
             CollectorResult result = engine.executeSync(new ServiceModel(collectorName, parameters)).get();
-            //TODO: Dispacther make it dynamic
-            ResultDispatcher dispatcher = new ConsoleDispatcher();
-            
+            ResultDispatcherRegistry dispatcherRegistry = (ResultDispatcherRegistry) dataMap.get("DispatcherRegistry");
+
+            String dispatcherName = dataMap.getString("DispatcherName");
+            ResultDispatcher dispatcher = dispatcherRegistry.get(dispatcherName)
+                .orElse(dispatcherRegistry.getDefault());
+
             String taskId = context.getJobDetail().getKey().getName();
             String groupName = context.getJobDetail().getKey().getGroup();
-            
+
             dispatcher.dispatch(taskId, groupName, result);
         } catch (Exception e) {
             String taskId = context.getJobDetail().getKey().getName();
