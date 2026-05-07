@@ -5,19 +5,19 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>io.github.xseejx.colletctorframework</groupId>
-    <artifactId>colletctorframework</artifactId>
+    <groupId>io.github.xseejx.collectorframework</groupId>
+    <artifactId>collectorframework</artifactId>
     <version>1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>io.github.xseejx.colletctorframework</groupId>
+  <groupId>io.github.xseejx.collectorframework</groupId>
   <artifactId>core</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <name>core</name>
   <!-- FIXME change it to the project's website -->
-  <url>https://github.com/xseejx-linux/colletctorframework</url>
+  <url>https://github.com/xseejx-linux/collectorframework</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

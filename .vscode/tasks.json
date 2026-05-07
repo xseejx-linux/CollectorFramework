@@ -80,7 +80,7 @@
       "label": "Clear Maven Cache",
       "type": "shell",
       "command": "rm",
-      "args": ["-rf", "${env:HOME}/.m2/repository/io/github/xseejx/colletctorframework/"],
+      "args": ["-rf", "${env:HOME}/.m2/repository/io/github/xseejx/collectorframework/"],
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",

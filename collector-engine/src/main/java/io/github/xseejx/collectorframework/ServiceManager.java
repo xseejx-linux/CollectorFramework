@@ -1,0 +1,257 @@
+package io.github.xseejx.collectorframework;
+
+// IMPORTS
+import java.lang.annotation.Annotation;
+// IMPORTS
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+// IMPORTS
+import java.nio.file.Path;
+// IMPORTS
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+// IMPORTS
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+// IMPORTS API
+import io.github.xseejx.collectorframework.Collector;
+import io.github.xseejx.collectorframework.CollectorMetadata;
+import io.github.xseejx.collectorframework.CollectorMetadata.ParameterType;
+import io.github.xseejx.collectorframework.CollectorResult;
+// IMPORTS INTERNAL
+import io.github.xseejx.collectorframework.internal.CollectorEngine;
+import io.github.xseejx.collectorframework.internal.CollectorNotFoundException;
+import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
+
+
+/**
+ * Class: ServiceManager
+ * Class used for enabling a ServiceManager on which it can start on-requests execution in sync or async
+ * 
+ * TODO: As of this version it can be fully replaced by TaskManager
+ */
+public class ServiceManager {
+
+    private final CollectorRegistry registry = new CollectorRegistry();
+    private final CollectorEngine engine = new CollectorEngine(registry);
+
+    /**
+     * Activate a single collector synchronously, with optional parameters.
+     * @param collectorName
+     * @param parameters
+     * @return
+     */
+    public String activateServiceSync(String collectorName, Map<String, Object> parameters) {
+        listAvailable();
+        
+        ServiceModel request = new ServiceModel(collectorName, parameters);
+        AtomicReference<String> jsonResponse = new AtomicReference<>("{}");
+        
+        registry.get(collectorName).ifPresent(collector -> {
+            
+            Future<CollectorResult> result = engine.executeSync(request);
+            try {
+                CollectorResult res = result.get();
+                jsonResponse.set(res.getResult().toJSONString());
+            } catch (Exception e) {
+                jsonResponse.set("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+        return jsonResponse.get(); 
+    }
+
+    /**
+     * Activate a single collector asynchronously, with optional parameters.
+     * @param collectorName
+     * @param parameters
+     * @return
+     */
+    public CompletableFuture<String> activateServiceAsync(String collectorName, Map<String, Object> parameters) {
+        listAvailable();
+
+        ServiceModel request = new ServiceModel(collectorName, parameters);
+
+        return engine.executeAsync(request)
+            .thenApply(res -> res.getResult().toJSONString())
+            .exceptionally(e -> "{\"error\": \"" + e.getMessage() + "\"}");
+    }
+
+    //TODO: must return a json array of results with collector name and result or error for each request
+    public List<CompletableFuture<String>> activateServicesAsync(List<Map<String, Map<String, Object>>> requests) {
+        listAvailable();
+        List<CompletableFuture<String>> futures = new ArrayList<>();
+     
+        for (Map<String, Map<String, Object>> request : requests) {
+
+            String collectorName = request.keySet().iterator().next();
+            Map<String, Object> parameters = request.get(collectorName);          
+
+            CompletableFuture<String> future = registry.get(collectorName)
+                .map(collector -> {
+                    ServiceModel serviceRequest = new ServiceModel(collectorName, parameters);
+                    return engine.executeAsync(serviceRequest)
+                        .thenApply(res -> {
+                            return "{\"collector\": \"" + collectorName +
+                                "\", \"result\": " +
+                                res.getResult().toJSONString() + "}";
+                        })
+                        .exceptionally(e -> {
+                            return "{\"collector\": \"" + collectorName +
+                                "\", \"error\": \"" +
+                                e.getMessage() + "\"}";
+                        });
+                })
+                .orElseGet(() -> CompletableFuture.completedFuture(
+                    "{\"collector\": \"" + collectorName +
+                    "\", \"error\": \"not found\"}"
+                ));
+
+            futures.add(future);
+        }
+        return futures;
+    }
+
+    /**
+     * Activate multiple collectors synchronously, with optional parameters.
+     * @param requests
+     * @return
+     */
+    public List<String> activateServicesSync(List<Map<String, Map<String, Object>>> requests) {
+        listAvailable();
+        List<ServiceModel> serviceRequests = new ArrayList<>();
+        AtomicReference<String> resultsJson = new AtomicReference<>("[]");
+
+        // Process requests and separate collectors from errors
+        requests.forEach(request -> {
+            String collectorName = request.entrySet().iterator().next().getKey();
+            Map<String, Object> parameters = request.get(collectorName);
+
+            registry.get(collectorName).ifPresentOrElse((collector -> {
+                serviceRequests.add(new ServiceModel(collectorName, parameters));
+            }), () -> {
+                return;
+            });
+        });
+        // Execute valid collectors
+        Map<String, Future<CollectorResult>> futures = engine.executeAllSync(serviceRequests);
+
+        futures.forEach((name, result) -> {
+            try {
+                CollectorResult res = result.get();
+                // Add successful result to results array (thread-safe)
+                resultsJson.updateAndGet(old -> {
+                    String newEntry = "{\"collector\": \"" + name + "\", \"result\": " + res.getResult().toJSONString() + "}";
+                    if (old.equals("[]")) {
+                        return "[" + newEntry + "]";
+                    } else {
+                        return old.substring(0, old.length() - 1) + "," + newEntry + "]";
+                    }
+                });
+            } catch (Exception e) {
+                // Add error result to results array (thread-safe)
+                resultsJson.updateAndGet(old -> {
+                    String newEntry = "{\"collector\": \"" + name + "\", \"error\": \"" + e.getMessage() + "\"}";
+                    if (old.equals("[]")) {
+                        return "[" + newEntry + "]";
+                    } else {
+                        return old.substring(0, old.length() - 1) + "," + newEntry + "]";
+                    }
+                });
+            }
+        });
+        return List.of(resultsJson.get());
+    } 
+
+    /**
+     * Get metadata information about a collector, such as description and tags.
+     * @param collectorName
+     * @return
+     */
+    public List<String> getMetadata(String collectorName) {
+        listAvailable();
+
+        List<String> results = new ArrayList<>();
+    
+        registry.get(collectorName).ifPresent(collector -> {
+            CollectorMetadata metadata =
+                collector.getClass().getAnnotation(CollectorMetadata.class);
+            if (metadata == null) {
+                results.add("No metadata found");
+                return;
+            }
+            for (Method method : metadata.annotationType().getDeclaredMethods()) {
+                try {
+                    Object value = method.invoke(metadata);
+                    String formattedValue = formatValue(value);
+                    results.add(method.getName() + ": " + formattedValue);
+                } catch (Exception e) {
+                    results.add(method.getName() + ": <error>");
+                }
+            }
+        });
+
+        return results;
+    }
+
+    private String formatValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        Class<?> clazz = value.getClass();
+        if (clazz.isArray()) {
+            int length = Array.getLength(value);
+            List<String> values = new ArrayList<>();
+            for (int i = 0; i < length; i++) {
+                values.add(formatValue(Array.get(value, i)));
+            }
+            return "[" + String.join(", ", values) + "]";
+        }
+        if (value instanceof Annotation annotation) {
+            List<String> parts = new ArrayList<>();
+            for (Method method : annotation.annotationType().getDeclaredMethods()) {
+                try {
+                    Object nestedValue = method.invoke(annotation);
+                    parts.add(method.getName() + "=" + formatValue(nestedValue));
+                } catch (Exception e) {
+                    parts.add(method.getName() + "=<error>");
+                }
+            }
+            return "(" + String.join(", ", parts) + ")";
+        }
+        return String.valueOf(value);
+    }
+
+    /**
+     * List all available collectors that can be executed.
+     * @return
+     */
+    public List<String> listAvailable() {
+        registry.discoverAll();
+        return registry.listAvailable().stream().sorted().toList();
+    }
+
+    /**
+     * Begin a service manager session.
+     * @return
+     */
+    public static ServiceManager begin() {
+        return new ServiceManager();
+    }
+
+    /**
+     * End the service manager session, shutting down any resources.
+     */
+    public void end() {
+        engine.shutdown();
+    }
+
+    public Collector getCollector(String collectorName) {
+        listAvailable();        
+        Collector collector = registry.get(collectorName)
+                .orElseThrow(() -> new CollectorNotFoundException(collectorName));
+
+        return collector;
+    }
+}
