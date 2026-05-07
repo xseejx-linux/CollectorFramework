@@ -44,7 +44,7 @@ dev: build
 .PHONY: clean-cache
 clean-cache:
 	@echo "Clearing Maven cache for this project..."
-	rm -rf ~/.m2/repository/io/github/xseejx/colletctorframework/
+	rm -rf ~/.m2/repository/io/github/xseejx/collectorframework/
 	@echo "✓ Cache cleared"
 
 .PHONY: full-rebuild

@@ -110,7 +110,7 @@ The **Maven Assembly Plugin** is now configured to:
 
 3. **Create uber JAR** - Packages everything into `shell/target/collector-app.jar`
 
-4. **Set main class** - Automatically finds entry point: `io.github.xseejx.colletctorframework.shell.App`
+4. **Set main class** - Automatically finds entry point: `io.github.xseejx.collectorframework.shell.App`
 
 Result: Single `java -jar collector-app.jar` command runs the entire stack.
 
@@ -154,7 +154,7 @@ cd CollectorFramework
 
 # Output:
 # Waiting for collector result...
-# Loaded: class io.github.xseejx.colletctorframework.collectors.hardware.CollectorCPU
+# Loaded: class io.github.xseejx.collectorframework.collectors.hardware.CollectorCPU
 # Collector result: {"data":{"model":"Test"},...}
 ```
 
