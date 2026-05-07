@@ -18,7 +18,6 @@
   <modules>
     <module>collector-api</module>
     <module>collector-engine</module>
-    <module>demo</module>
   </modules>
   <!---->
   <dependencyManagement>
