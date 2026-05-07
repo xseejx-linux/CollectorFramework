@@ -1,4 +1,4 @@
-# CollectorFramework
+# CollectorFramework (UNSTABLE BRANCH)
 
 A Java-based pluggable framework for collecting system and hardware information. Collectors are discovered at runtime via Java's **Service Provider Interface (SPI)**, making it easy to add new data sources without modifying core code.
 
