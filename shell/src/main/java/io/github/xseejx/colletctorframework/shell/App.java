@@ -222,5 +222,225 @@ public class App
 
         manager.shutdown();
         System.out.println("Collector scheduling demo complete.");
+        /*
+
+package io.github.xseejx.colletctorframework.shell;
+
+import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+import io.github.xseejx.colletctorframework.core.api.Collector;
+import io.github.xseejx.colletctorframework.core.service.ServiceManager;
+
+public class App {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ServiceManager activator = new ServiceManager();
+
+        try {
+
+            List<String> available = activator.listAvailable();
+            if (available == null || available.isEmpty()) {
+                System.out.println("No collectors available.");
+                return;
+            }
+
+            System.out.println("Available collectors:");
+            for (int i = 0; i < available.size(); i++) {
+                System.out.println("[" + i + "] " + available.get(i));
+            }
+
+            System.out.print("Select collector index: ");
+            int selectedIndex = Integer.parseInt(scanner.nextLine().trim());
+
+            if (selectedIndex < 0 || selectedIndex >= available.size()) {
+                System.out.println("Invalid index.");
+                return;
+            }
+
+            String collectorName = available.get(selectedIndex);
+            Collector collector = activator.getCollector(collectorName);
+
+            if (collector == null) {
+                System.out.println("Collector not found: " + collectorName);
+                return;
+            }
+
+            Map<String, Class<?>> accepted = collector.getAcceptedParameters();
+            Map<String, Object> params = new LinkedHashMap<>();
+
+            System.out.println("\nEditing parameters for: " + collectorName);
+
+            for (Map.Entry<String, Class<?>> entry : accepted.entrySet()) {
+                String key = entry.getKey();
+                Class<?> type = entry.getValue();
+
+                Field field = findField(collector.getClass(), key);
+                if (field == null) {
+                    System.out.println("Skipping missing field: " + key);
+                    continue;
+                }
+
+                field.setAccessible(true);
+                Object currentValue = field.get(collector);
+
+                System.out.println();
+                System.out.println("Parameter: " + key);
+                System.out.println("Type: " + type.getSimpleName());
+                System.out.println("Current value: " + currentValue);
+                System.out.print("New value (ENTER to keep): ");
+
+                String input = scanner.nextLine();
+
+                Object finalValue = input.isBlank()
+                        ? currentValue
+                        : convert(input, type);
+
+                params.put(key, finalValue);
+            }
+
+            injectValues(collector, params);
+
+            System.out.println("\nFinal parameters:");
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                System.out.println(entry.getKey() + " -> " + entry.getValue());
+            }
+
+            System.out.println("\nCollector output:");
+            String result = activator.activateServiceSync(collectorName, params);
+            //System.out.println(collector.collect().getResult().toJSONString());
+            System.out.println(result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            scanner.close();
+            activator.end();
+        }
+    }
+
+    private static Field findField(Class<?> clazz, String fieldName) {
+        Class<?> current = clazz;
+
+        while (current != null) {
+            try {
+                return current.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException ignored) {
+                current = current.getSuperclass();
+            }
+        }
+
+        return null;
+    }
+
+    private static void injectValues(Collector collector, Map<String, Object> params) throws Exception {
+        Class<?> clazz = collector.getClass();
+
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            Field field = findField(clazz, key);
+            if (field == null) {
+                continue;
+            }
+
+            field.setAccessible(true);
+            Object converted = adaptToFieldType(field.getType(), value);
+            field.set(collector, converted);
+        }
+    }
+
+    private static Object adaptToFieldType(Class<?> fieldType, Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (fieldType.isAssignableFrom(value.getClass())) {
+            return value;
+        }
+
+        if (fieldType == boolean.class || fieldType == Boolean.class) {
+            return Boolean.parseBoolean(value.toString());
+        }
+
+        if (fieldType == int.class || fieldType == Integer.class) {
+            return Integer.parseInt(value.toString());
+        }
+
+        if (fieldType == long.class || fieldType == Long.class) {
+            return Long.parseLong(value.toString());
+        }
+
+        if (fieldType == float.class || fieldType == Float.class) {
+            return Float.parseFloat(value.toString());
+        }
+
+        if (fieldType == double.class || fieldType == Double.class) {
+            return Double.parseDouble(value.toString());
+        }
+
+        if (fieldType == String.class) {
+            return value.toString();
+        }
+
+        if (fieldType == Path.class) {
+            return Path.of(value.toString());
+        }
+
+        if (fieldType.isEnum()) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            Enum<?> enumValue = Enum.valueOf((Class<? extends Enum>) fieldType, value.toString());
+            return enumValue;
+        }
+
+        return value;
+    }
+
+    private static Object convert(String input, Class<?> type) {
+        if (type == String.class) {
+            return input;
+        }
+
+        if (type == boolean.class || type == Boolean.class) {
+            return Boolean.parseBoolean(input);
+        }
+
+        if (type == int.class || type == Integer.class) {
+            return Integer.parseInt(input);
+        }
+
+        if (type == long.class || type == Long.class) {
+            return Long.parseLong(input);
+        }
+
+        if (type == float.class || type == Float.class) {
+            return Float.parseFloat(input);
+        }
+
+        if (type == double.class || type == Double.class) {
+            return Double.parseDouble(input);
+        }
+
+        if (type == Path.class) {
+            return Path.of(input);
+        }
+
+        if (type.isEnum()) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            Enum<?> enumValue = Enum.valueOf((Class<? extends Enum>) type, input);
+            return enumValue;
+        }
+
+        return input;
+    }
+}
+        
+        */
     }
 }

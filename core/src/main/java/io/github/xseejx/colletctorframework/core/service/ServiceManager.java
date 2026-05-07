@@ -1,5 +1,9 @@
 package io.github.xseejx.colletctorframework.core.service;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +11,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.github.xseejx.colletctorframework.core.api.Collector;
+import io.github.xseejx.colletctorframework.core.api.CollectorMetadata;
+import io.github.xseejx.colletctorframework.core.api.CollectorMetadata.ParameterType;
 import io.github.xseejx.colletctorframework.core.api.CollectorResult;
 import io.github.xseejx.colletctorframework.core.engine.CollectorEngine;
+import io.github.xseejx.colletctorframework.core.engine.CollectorNotFoundException;
 import io.github.xseejx.colletctorframework.core.registry.CollectorRegistry;
 
 
@@ -149,17 +157,58 @@ public class ServiceManager {
      * @param collectorName
      * @return
      */
-    public List<String> getMetada(String collectorName) {
+    public List<String> getMetadata(String collectorName) {
         listAvailable();
+
         List<String> results = new ArrayList<>();
+    
         registry.get(collectorName).ifPresent(collector -> {
-            // Let dynamicallt add metadata infos
-            results.add("Name: " + collector.getName());
-            results.add("Description: " + collector.getClass().getAnnotation(io.github.xseejx.colletctorframework.core.api.CollectorMetadata.class).description());
-            results.add("Tags: " + String.join(", ", collector.getClass().getAnnotation(io.github.xseejx.colletctorframework.core.api.CollectorMetadata.class).tags()));
-            //results.add("Description: " + collector.getClass().getAnnotation(io.github.xseejx.colletctorframework.core.api.CollectorMetadata.class).new_field());
+            CollectorMetadata metadata =
+                collector.getClass().getAnnotation(CollectorMetadata.class);
+            if (metadata == null) {
+                results.add("No metadata found");
+                return;
+            }
+            for (Method method : metadata.annotationType().getDeclaredMethods()) {
+                try {
+                    Object value = method.invoke(metadata);
+                    String formattedValue = formatValue(value);
+                    results.add(method.getName() + ": " + formattedValue);
+                } catch (Exception e) {
+                    results.add(method.getName() + ": <error>");
+                }
+            }
         });
+
         return results;
+    }
+
+    private String formatValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        Class<?> clazz = value.getClass();
+        if (clazz.isArray()) {
+            int length = Array.getLength(value);
+            List<String> values = new ArrayList<>();
+            for (int i = 0; i < length; i++) {
+                values.add(formatValue(Array.get(value, i)));
+            }
+            return "[" + String.join(", ", values) + "]";
+        }
+        if (value instanceof Annotation annotation) {
+            List<String> parts = new ArrayList<>();
+            for (Method method : annotation.annotationType().getDeclaredMethods()) {
+                try {
+                    Object nestedValue = method.invoke(annotation);
+                    parts.add(method.getName() + "=" + formatValue(nestedValue));
+                } catch (Exception e) {
+                    parts.add(method.getName() + "=<error>");
+                }
+            }
+            return "(" + String.join(", ", parts) + ")";
+        }
+        return String.valueOf(value);
     }
 
     /**
@@ -184,5 +233,13 @@ public class ServiceManager {
      */
     public void end() {
         engine.shutdown();
+    }
+
+    public Collector getCollector(String collectorName) {
+        listAvailable();        
+        Collector collector = registry.get(collectorName)
+                .orElseThrow(() -> new CollectorNotFoundException(collectorName));
+
+        return collector;
     }
 }
