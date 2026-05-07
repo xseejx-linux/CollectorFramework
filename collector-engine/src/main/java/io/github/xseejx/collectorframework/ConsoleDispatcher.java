@@ -1,8 +1,8 @@
 package io.github.xseejx.collectorframework;
 
 // IMPORTS API
-import io.github.xseejx.collectorframework.CollectorResult;
-import io.github.xseejx.collectorframework.ResultDispatcher;
+import io.github.xseejx.collectorframework.api.CollectorResult;
+import io.github.xseejx.collectorframework.api.ResultDispatcher;
 // IMPORTS JSON
 import org.json.simple.JSONObject;
 

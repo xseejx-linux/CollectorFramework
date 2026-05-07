@@ -33,7 +33,7 @@
     </dependency>
 <!---->
     <dependency>
-      <groupId>io.github.xseejx.collectorframework</groupId>
+      <groupId>io.github.xseejx.collectorframework.api</groupId>
       <artifactId>collector-api</artifactId>
     </dependency>
 <!---->

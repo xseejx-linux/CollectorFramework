@@ -12,8 +12,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 // IMPORTS API
-import io.github.xseejx.collectorframework.CollectorResult;
-import io.github.xseejx.collectorframework.ResultDispatcher;
+import io.github.xseejx.collectorframework.api.CollectorResult;
+import io.github.xseejx.collectorframework.api.ResultDispatcher;
 // IMPORTS INTERNAL
 import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
 import io.github.xseejx.collectorframework.ConsoleDispatcher;

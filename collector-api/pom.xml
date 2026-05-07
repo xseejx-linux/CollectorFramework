@@ -10,7 +10,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 <!---->
-  <groupId>io.github.xseejx.collectorframework</groupId>
+  <groupId>io.github.xseejx.collectorframework.api</groupId>
   <artifactId>collector-api</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>collector-api</name>

@@ -1,4 +1,4 @@
-package io.github.xseejx.collectorframework;
+package io.github.xseejx.collectorframework.api;
 
 
 /**

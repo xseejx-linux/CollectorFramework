@@ -16,10 +16,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 // IMPORTS API
-import io.github.xseejx.collectorframework.Collector;
-import io.github.xseejx.collectorframework.CollectorMetadata;
-import io.github.xseejx.collectorframework.CollectorMetadata.ParameterType;
-import io.github.xseejx.collectorframework.CollectorResult;
+import io.github.xseejx.collectorframework.api.Collector;
+import io.github.xseejx.collectorframework.api.CollectorMetadata;
+import io.github.xseejx.collectorframework.api.CollectorMetadata.ParameterType;
+import io.github.xseejx.collectorframework.api.CollectorResult;
 // IMPORTS INTERNAL
 import io.github.xseejx.collectorframework.internal.CollectorEngine;
 import io.github.xseejx.collectorframework.internal.CollectorNotFoundException;

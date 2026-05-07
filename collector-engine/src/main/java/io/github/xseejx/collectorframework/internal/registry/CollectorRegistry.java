@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 // IMPORTS API
-import io.github.xseejx.collectorframework.CollectorMetadata;
-import io.github.xseejx.collectorframework.Collector;
+import io.github.xseejx.collectorframework.api.CollectorMetadata;
+import io.github.xseejx.collectorframework.api.Collector;
 
 /**
  * 

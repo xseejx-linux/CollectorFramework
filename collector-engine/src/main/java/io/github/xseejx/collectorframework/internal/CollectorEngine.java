@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import io.github.xseejx.collectorframework.internal.registry.CollectorRegistry;
 import io.github.xseejx.collectorframework.ServiceModel;
 // IMPORTS API
-import io.github.xseejx.collectorframework.Collector;
-import io.github.xseejx.collectorframework.CollectorResult;
+import io.github.xseejx.collectorframework.api.Collector;
+import io.github.xseejx.collectorframework.api.CollectorResult;
 
 /**
  * 
