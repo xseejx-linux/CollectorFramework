@@ -28,6 +28,8 @@
 
   <dependencyManagement>
     <dependencies>
+
+      <!-- ── Framework interno ─────────────────────────────────────────── -->
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -49,6 +51,53 @@
         <artifactId>slf4j-simple</artifactId>
         <version>2.0.13</version>
       </dependency>
+
+      <!--
+        collectors/pom.xml — aggiungere le due dipendenze Pcap4J dentro <dependencies>.
+        La versione NON va ripetuta: è già definita nel dependencyManagement del root pom.xml.
+      -->
+
+      <dependencies>
+
+        <!-- ... tue dipendenze esistenti ... -->
+
+        <!-- Pcap4J — aggiungi ENTRAMBE, sono entrambe necessarie -->
+        <dependency>
+          <groupId>org.pcap4j</groupId>
+          <artifactId>pcap4j-core</artifactId>
+          <!-- nessuna <version>: ereditata dal root dependencyManagement -->
+        </dependency>
+        <dependency>
+          <groupId>org.pcap4j</groupId>
+          <artifactId>pcap4j-packetfactory-static</artifactId>
+          <!-- nessuna <version>: ereditata dal root dependencyManagement -->
+        </dependency>
+
+      </dependencies>
+
+      <!-- ── Pcap4J — packet sniffing ──────────────────────────────────── -->
+      <!--
+        REQUISITI DI SISTEMA:
+          Windows : installa Npcap (https://npcap.com) + esegui come Administrator
+          Linux   : sudo apt install libpcap-dev
+                    sudo setcap cap_net_raw,cap_net_admin=eip $(which java)
+          macOS   : libpcap già presente, esegui con sudo
+      -->
+      <dependency>
+        <groupId>org.pcap4j</groupId>
+        <artifactId>pcap4j-core</artifactId>
+        <version>1.8.2</version>
+      </dependency>
+      <dependency>
+        <!--
+          OBBLIGATORIO: senza questo artefatto Pcap4J non sa decodificare
+          TCP / UDP / ICMP dai byte raw e lancia ClassNotFoundException a runtime.
+        -->
+        <groupId>org.pcap4j</groupId>
+        <artifactId>pcap4j-packetfactory-static</artifactId>
+        <version>1.8.2</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -94,4 +143,5 @@
       </plugins>
     </pluginManagement>
   </build>
+
 </project>
