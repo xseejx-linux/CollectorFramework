@@ -15,7 +15,6 @@ import org.json.simple.JSONObject;
 
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
-import oshi.hardware.Sensors;
 import oshi.software.os.OperatingSystem;
 
 @AutoService(Collector.class)
@@ -41,7 +40,6 @@ public class CollectorCPU implements Collector {
         try {
             SystemInfo si = new SystemInfo();
             CentralProcessor cpu = si.getHardware().getProcessor();
-            Sensors sensors = si.getHardware().getSensors();
             OperatingSystem os = si.getOperatingSystem();
 
             JSONObject result = new JSONObject();
