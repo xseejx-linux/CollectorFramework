@@ -27,6 +27,7 @@ public interface Collector {
      * Describes what fields/filters this collector accepts.
      * Core uses this for reflective field injection before calling collect().
      */
+    @Deprecated
     default Map<String, Class<?>> getAcceptedParameters() {
         return Collections.emptyMap();
     }
