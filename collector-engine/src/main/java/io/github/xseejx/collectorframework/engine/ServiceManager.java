@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 // IMPORTS
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 // IMPORTS
@@ -247,6 +248,13 @@ public class ServiceManager {
         engine.shutdown();
     }
 
+    /**
+     * Get Collector Object.
+     * To soon remove as it doesn't respect the project structure, but it jumps straight to the collector
+     * @param collectorName
+     * @return
+     */
+    @Deprecated
     public Collector getCollector(String collectorName) {
         listAvailable();        
         Collector collector = registry.get(collectorName)
@@ -254,4 +262,62 @@ public class ServiceManager {
 
         return collector;
     }
+
+      /**
+     * (Once getAcceptedParameters() is remove or replaced this function will too) yet not deprecated as it is used
+     * Retrieves the list of internal parameters for a collector when the
+     * {@code CollectorMetadata} annotation does not define any parameters.
+     * <p>
+     * This method checks if the annotation's {@code parameters()} array is
+     * empty. If it is, the method calls {@link Collector#getAcceptedParameters()}
+     * and converts each entry into a map containing the parameter's key,
+     * type (as a {@link ParameterType} string), an empty default value, and
+     * {@code required} set to {@code false}.
+     *
+     * @param collectorName the name of the collector to inspect
+     * @return a list of parameter descriptions, or an empty list if the
+     *         annotation already defines parameters or the collector is not found
+     */
+    public List<Map<String, Object>> getUnlistedParameters(String collectorName) {
+        listAvailable();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        registry.get(collectorName).ifPresent(collector -> {
+            CollectorMetadata metadata = collector.getClass().getAnnotation(CollectorMetadata.class);
+            if (metadata != null && metadata.parameters().length == 0) {
+                Map<String, Class<?>> accepted = collector.getAcceptedParameters();
+                if (accepted != null) {
+                    for (Map.Entry<String, Class<?>> entry : accepted.entrySet()) {
+                        Map<String, Object> paramMap = new LinkedHashMap<>();
+                        paramMap.put("key", entry.getKey());
+                        paramMap.put("type", mapClassToParameterType(entry.getValue()).name());
+                        paramMap.put("defaultValue", "");
+                        paramMap.put("required", false);
+                        result.add(paramMap);
+                    }
+                }
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Maps a Java {@link Class} to the corresponding {@link ParameterType}.
+     *
+     * @param clazz the Java type to map
+     * @return the matching {@code ParameterType}, or {@link ParameterType#UNKNOWN}
+     *         if no direct mapping exists
+     */
+    private ParameterType mapClassToParameterType(Class<?> clazz) {
+        if (clazz == String.class) return ParameterType.STRING;
+        if (clazz == boolean.class || clazz == Boolean.class) return ParameterType.BOOLEAN;
+        if (clazz == int.class || clazz == Integer.class) return ParameterType.INTEGER;
+        if (clazz == float.class || clazz == Float.class) return ParameterType.FLOAT;
+        if (clazz == long.class || clazz == Long.class) return ParameterType.LONG;
+        if (clazz == Path.class) return ParameterType.PATH;
+        if (clazz == byte[].class) return ParameterType.BINARY;
+        return ParameterType.UNKNOWN;
+    }
+
 }
