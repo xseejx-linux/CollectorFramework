@@ -1,4 +1,4 @@
-# CollectorFramework (UNSTABLE BRANCH)
+# CollectorFramework
 
 A Java-based pluggable framework for collecting system and hardware information. Collectors are discovered at runtime via Java's **Service Provider Interface (SPI)**, making it easy to add new data sources without modifying core code.
 
@@ -117,7 +117,6 @@ No configuration files, no registry edits, no core code changes.
 - **json-simple** — JSON serialization for collector results
 - **SLF4J** — Logging facade
 - **AutoService** — Compile-time SPI descriptor generation
-- **OSHI** — Hardware information (CPU data)
 
 ## Documentation
 
@@ -133,7 +132,7 @@ No configuration files, no registry edits, no core code changes.
 - [X] Use one engine and reuse it: `CollectorEngine engine = new CollectorEngine(registry);`
 - [x] Use `CompletableFuture.supplyAsync(() -> { ... }, threadPool)`
 - [X] App.java (in shell) is like-app that can be anything, external app, outer server conencting to host, everything that want to use this framework.
-- [ ] Select dispatcher dynamically via `TaskModel` (choose it like for collectors)
-- [ ] (optional) Try implementing RabbitMQ
-- [ ] Add module-info
-- [ ] Remove shell package, it will be an external project 
+- [X] Select dispatcher dynamically via `TaskModel` (choose it like for collectors)
+- [X] (optional) Try implementing RabbitMQ
+- [X] Add module-info
+- [X] Remove shell package, it will be an [external project](https://github.com/xseejx-linux/demo) 
